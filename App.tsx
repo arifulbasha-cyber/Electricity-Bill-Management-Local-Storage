@@ -116,7 +116,7 @@ const AppContent: React.FC = () => {
   const { t, translateMonth } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   type AppView = 'home' | 'estimator' | 'history' | 'stats' | 'trends' | 'tariff';
-  const [currentView, setCurrentView] = useState<AppView>('estimator');
+  const [currentView, setCurrentView] = useState<AppView>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'none' | 'cloud'>('none');
   const [config, setConfig] = useState<BillConfig>(INITIAL_CONFIG);
@@ -249,7 +249,7 @@ const AppContent: React.FC = () => {
     const updatedHistory = sortBills([newRecord, ...history]);
     setHistory(updatedHistory);
     localStorage.setItem('tmss_bill_history', JSON.stringify(updatedHistory));
-    alert("Bill saved to local history. Use 'Push to Cloud' to backup.");
+    alert("Bill saved to history.");
   };
 
   const handleNextMonth = () => {
@@ -258,29 +258,24 @@ const AppContent: React.FC = () => {
       const currentIndex = monthNames.indexOf(config.month);
       const nextMonth = monthNames[(currentIndex + 1) % 12];
       
-      // Update config
       setConfig(prev => ({
         ...prev,
         month: nextMonth,
         dateGenerated: new Date().toISOString().split('T')[0]
       }));
 
-      // Update main meter: current becomes previous
       setMainMeter(prev => ({
         ...prev,
         previous: prev.current,
-        // Reset current for better UX or leave as is if user wants to keep tracking
       }));
 
-      // Update sub-meters: current becomes previous
       setMeters(prev => prev.map(m => ({
         ...m,
         previous: m.current,
-        // Reset current to match the new previous for starting fresh
       })));
       
       setCurrentView('home');
-      alert(`Prepared for ${translateMonth(nextMonth)} bill.`);
+      alert(`Reading rolled over for ${translateMonth(nextMonth)}.`);
     }
   };
 
@@ -300,7 +295,7 @@ const AppContent: React.FC = () => {
     switch(currentView) {
       case 'home': return <Dashboard config={config} result={calculationResult} mainMeter={mainMeter} meters={meters} onUpdateMeters={setMeters} onMainMeterUpdate={setMainMeter} onConfigUpdate={setConfig} tenants={[]} tariffConfig={tariffConfig} onSaveHistory={saveToHistory} />;
       case 'estimator': return <BillEstimator tariffConfig={tariffConfig} />;
-      case 'history': return <BillHistory history={history} onLoad={loadFromHistory} onDelete={(id) => { if (window.confirm(t('confirm_delete'))) { const h = history.filter(h => h.id !== id); setHistory(h); localStorage.setItem('tmss_bill_history', JSON.stringify(h)); } }} onViewReport={loadFromHistory} />;
+      case 'history': return <BillHistory history={history} onLoad={loadFromHistory} onDelete={(id) => { const h = history.filter(h => h.id !== id); setHistory(h); localStorage.setItem('tmss_bill_history', JSON.stringify(h)); }} onViewReport={loadFromHistory} />;
       case 'stats': return <ConsumptionStats calculations={calculationResult.userCalculations} totalUnits={calculationResult.totalUnits} />;
       case 'trends': return <TrendsDashboard history={history} />;
       case 'tariff': return <TariffSettings config={tariffConfig} onSave={handleTariffSave} />;
@@ -310,8 +305,8 @@ const AppContent: React.FC = () => {
 
   const headerTitle = useMemo(() => {
     switch(currentView) {
-      case 'estimator': return 'Electricity Bill Calculator';
-      case 'home': return 'Bill Splitter';
+      case 'estimator': return 'Calculator';
+      case 'home': return 'Splitter';
       case 'history': return 'History';
       case 'tariff': return t('tariff_settings');
       case 'trends': return t('trends_dashboard');

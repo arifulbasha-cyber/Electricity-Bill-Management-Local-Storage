@@ -15,8 +15,8 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
   const { t, translateMonth, formatNumber } = useLanguage();
   const [billToDelete, setBillToDelete] = useState<SavedBill | null>(null);
   const [confirmText, setConfirmText] = useState('');
-  const touchStartRef = useRef<number | null>(null);
-  const swipeTriggeredRef = useRef<boolean>(false);
+  
+  const longPressTimerRef = useRef<number | null>(null);
 
   if (history.length === 0) return (
     <div className="flex flex-col items-center justify-center p-20 bg-indigo-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border border-indigo-100 dark:border-slate-800 text-center transition-colors duration-200">
@@ -28,34 +28,23 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
     </div>
   );
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = e.targetTouches[0].clientX;
-    swipeTriggeredRef.current = false;
+  const startLongPress = (bill: SavedBill) => {
+    longPressTimerRef.current = window.setTimeout(() => {
+      setBillToDelete(bill);
+      setConfirmText('');
+      if ('vibrate' in navigator) navigator.vibrate(50);
+    }, 800);
   };
 
-  const onTouchMove = (e: React.TouchEvent, bill: SavedBill) => {
-    if (touchStartRef.current === null || swipeTriggeredRef.current) return;
-    
-    const diff = touchStartRef.current - e.targetTouches[0].clientX;
-    
-    // If swiped left more than 80px, directly open delete modal
-    if (diff > 80) {
-      swipeTriggeredRef.current = true;
-      handleOpenDeleteConfirm(bill);
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
     }
   };
 
-  const onTouchEnd = () => {
-    touchStartRef.current = null;
-  };
-
-  const handleOpenDeleteConfirm = (bill: SavedBill) => {
-    setBillToDelete(bill);
-    setConfirmText('');
-  };
-
   const handleConfirmDelete = () => {
-    if (billToDelete && confirmText === billToDelete.config.month) {
+    if (billToDelete && confirmText.toUpperCase() === 'DELETE') {
       onDelete(billToDelete.id);
       setBillToDelete(null);
     }
@@ -70,18 +59,18 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700">
-      {/* Redundant 'Bill History' text removed from here */}
-      
+    <div className="space-y-4 animate-in fade-in duration-700 max-w-2xl mx-auto">
       <div className="space-y-3">
         {history.map((bill) => {
           return (
             <div 
               key={bill.id} 
-              className="relative overflow-hidden rounded-[2.5rem]"
-              onTouchStart={onTouchStart}
-              onTouchMove={(e) => onTouchMove(e, bill)}
-              onTouchEnd={onTouchEnd}
+              className="relative overflow-hidden rounded-[2.5rem] select-none touch-none"
+              onMouseDown={() => startLongPress(bill)}
+              onMouseUp={cancelLongPress}
+              onMouseLeave={cancelLongPress}
+              onTouchStart={() => startLongPress(bill)}
+              onTouchEnd={cancelLongPress}
             >
               <div 
                 onClick={() => onViewReport(bill)}
@@ -116,7 +105,6 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
         })}
       </div>
 
-      {/* Physical Delete Confirmation Modal */}
       {billToDelete && (
         <div 
           onClick={() => setBillToDelete(null)}
@@ -124,18 +112,15 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="glass-card bg-white dark:bg-slate-900 w-full max-sm:w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-rose-500/20 animate-in slide-in-from-bottom-4 relative overflow-hidden"
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-rose-500/20 animate-in slide-in-from-bottom-4 relative overflow-hidden text-center"
           >
-            {/* Visual Warning Decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-            
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shadow-inner">
                      <ShieldAlert className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Security Check</h3>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Hold Triggered</h3>
                 </div>
                 <button onClick={() => setBillToDelete(null)} className="p-3 bg-black/5 dark:bg-white/5 rounded-2xl active:scale-90 transition-all">
                     <X className="w-5 h-5 text-slate-500" />
@@ -145,33 +130,32 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
               <div className="space-y-6">
                 <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/10">
                   <p className="text-xs font-bold text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                    To permanently delete the bill for <span className="text-rose-500 font-black px-1">{translateMonth(billToDelete.config.month)}</span>, please type the month name exactly as shown.
+                    To delete record for <span className="font-black underline">{translateMonth(billToDelete.config.month)}</span>, type <span className="text-rose-500 font-black">DELETE</span>.
                   </p>
                   
                   <div className="relative">
-                    <label className="absolute left-4 top-2.5 text-[8px] font-black text-rose-500/60 uppercase tracking-[0.2em]">TYPE MONTH NAME</label>
                     <input 
                       type="text"
                       autoFocus
-                      placeholder={billToDelete.config.month}
+                      placeholder="DELETE"
                       value={confirmText}
                       onChange={(e) => setConfirmText(e.target.value)}
-                      className="w-full h-16 rounded-xl bg-white dark:bg-slate-950 border border-rose-500/20 px-4 pt-6 pb-2 text-base font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800"
+                      className="w-full h-16 rounded-xl bg-white dark:bg-slate-950 border border-rose-500/20 px-4 text-center text-lg font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800 uppercase"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-2">
                   <button 
-                    disabled={confirmText !== billToDelete.config.month}
+                    disabled={confirmText.toUpperCase() !== 'DELETE'}
                     onClick={handleConfirmDelete}
                     className={`w-full h-14 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
-                      confirmText === billToDelete.config.month
+                      confirmText.toUpperCase() === 'DELETE'
                         ? 'bg-rose-600 text-white shadow-xl shadow-rose-500/30 active:scale-95'
                         : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-50'
                     }`}
                   >
-                    <Trash2 className="w-5 h-5" /> Physical Delete
+                    <Trash2 className="w-5 h-5" /> Confirm Removal
                   </button>
                 </div>
               </div>

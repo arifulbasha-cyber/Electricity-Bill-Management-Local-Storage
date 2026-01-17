@@ -107,7 +107,9 @@ const calculateBillBreakdown = (
         unitsUsed: units,
         energyCost: userEnergyCost,
         fixedCost: fixedCostPerUser,
-        totalPayable: totalPayable
+        totalPayable: totalPayable,
+        previous: m.previous,
+        current: m.current
       };
     });
 

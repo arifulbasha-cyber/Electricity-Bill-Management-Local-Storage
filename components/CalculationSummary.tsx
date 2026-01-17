@@ -243,7 +243,9 @@ const CalculationSummary: React.FC<CalculationSummaryProps> = ({ result, config,
                      {result.userCalculations.map((user) => (
                         <tr key={user.id}>
                            <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{user.name || 'User'}</td>
-                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono">{formatNumber(user.unitsUsed.toFixed(2))}</td>
+                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono">
+                              ({formatNumber(user.current.toFixed(2))} - {formatNumber(user.previous.toFixed(2))}) = {formatNumber(user.unitsUsed.toFixed(2))}
+                           </td>
                            <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-white font-mono">৳{formatNumber(Math.round(user.totalPayable))}</td>
                         </tr>
                      ))}

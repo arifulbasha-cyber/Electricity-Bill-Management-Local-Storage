@@ -23,6 +23,8 @@ export interface UserCalculation {
   energyCost: number;
   fixedCost: number;
   totalPayable: number;
+  previous: number;
+  current: number;
 }
 
 export interface BillCalculationResult {

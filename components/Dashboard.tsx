@@ -60,13 +60,11 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     }
   };
 
-  const mainMeterUnits = Math.max(0, mainMeter.current - mainMeter.previous);
-  const totalUserUnits = result.totalUnits;
-  
-  const fixedBase = tariffConfig.demandCharge + tariffConfig.meterRent;
+  const mainUnits = Math.max(0, mainMeter.current - mainMeter.previous);
   const bkash = config.includeBkashFee ? tariffConfig.bkashCharge : 0;
-  const sharedFixedTotal = fixedBase + result.vatFixed + bkash + result.lateFee;
-  const fixedPerUser = meters.length > 0 ? sharedFixedTotal / meters.length : 0;
+  const baseBill = result.totalCollection - result.lateFee - bkash;
+  const totalSharedFixedCosts = tariffConfig.demandCharge + tariffConfig.meterRent + result.vatFixed + result.lateFee + bkash;
+  const fixedPerUser = meters.length > 0 ? totalSharedFixedCosts / meters.length : 0;
 
   return (
     <div className="space-y-6 pb-32 animate-in fade-in duration-500">
@@ -274,70 +272,135 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
         </button>
       )}
 
-      {/* Simple Table Results Card */}
+      {/* Bill Results Sections */}
       {showResult && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-6 duration-500">
-          <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Bill Summary</h2>
-             <button onClick={() => setShowResult(false)} className="text-slate-400 hover:text-slate-600"><ChevronUp className="w-6 h-6" /></button>
+        <div className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Calculation Result</h2>
+            <button onClick={() => setShowResult(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
+              <ChevronUp className="w-5 h-5 text-slate-500" />
+            </button>
           </div>
 
-          <div className="p-6 space-y-8">
-            {/* System Table */}
-            <div className="overflow-x-auto">
-               <table className="w-full text-sm text-left border-collapse">
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                     <tr>
-                        <td className="py-3 text-slate-500 dark:text-slate-400 font-medium">Main Meter Units</td>
-                        <td className="py-3 text-right font-bold text-slate-900 dark:text-white">{formatNumber(mainMeterUnits.toFixed(2))} kWh</td>
+          {/* 1. Summary Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Summary</h3>
+             
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Date</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">{formatDateLocalized(config.dateGenerated)}</span>
+             </div>
+
+             <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                   <span className="text-sm text-slate-500 font-medium">Total Bill Payable</span>
+                   <span className="text-base font-black text-slate-900 dark:text-white">৳{formatNumber(result.totalCollection.toFixed(2))}</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold text-center italic bg-slate-50 dark:bg-slate-800/50 py-2 rounded-xl">
+                   (Base Bill: ৳{formatNumber(baseBill.toFixed(2))} + Late Fee: ৳{formatNumber(result.lateFee.toFixed(2))} + bKash Fee: ৳{formatNumber(bkash.toFixed(2))})
+                </div>
+             </div>
+
+             <div className="flex justify-between items-center text-sm pt-2">
+                <span className="text-slate-500 font-medium">Total Units (Main)</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">
+                   ({formatNumber(mainMeter.current.toFixed(2))} - {formatNumber(mainMeter.previous.toFixed(2))}) = {formatNumber(mainUnits.toFixed(2))} kWh
+                </span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Total User Units</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">{formatNumber(result.totalUnits.toFixed(2))} kWh</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Calculated Rate/Unit (Energy)</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.calculatedRate.toFixed(2))}</span>
+             </div>
+          </div>
+
+          {/* 2. Cost Configuration Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Cost Configuration</h3>
+             
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Demand Charge</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(tariffConfig.demandCharge.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Meter Rent</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(tariffConfig.meterRent.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">VAT (Fixed - 5.0% on DC+Rent)</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.vatFixed.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Total VAT</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.vatTotal.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Late Fee</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.lateFee.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">bKash Fee</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(bkash.toFixed(2))}</span>
+             </div>
+
+             <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-600 dark:text-slate-400 font-bold">Total Shared Fixed Costs</span>
+                <span className="text-slate-900 dark:text-white font-black">৳{formatNumber(totalSharedFixedCosts.toFixed(2))}</span>
+             </div>
+
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-600 dark:text-slate-400 font-bold">Fixed Cost Per User</span>
+                <span className="text-slate-900 dark:text-white font-black">৳{formatNumber(fixedPerUser.toFixed(2))}</span>
+             </div>
+          </div>
+
+          {/* 3. Individual Bills Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Individual Bills</h3>
+             
+             <div className="overflow-hidden border border-slate-100 dark:border-slate-800 rounded-xl">
+               <table className="w-full text-left border-collapse text-sm">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50">
+                     <tr className="text-slate-500 font-bold text-xs uppercase">
+                        <th className="px-4 py-3">User</th>
+                        <th className="px-4 py-3 text-right">Units</th>
+                        <th className="px-4 py-3 text-right">Bill</th>
                      </tr>
-                     <tr>
-                        <td className="py-3 text-slate-500 dark:text-slate-400 font-medium">Unit Rate (Derived)</td>
-                        <td className="py-3 text-right font-bold text-indigo-600 dark:text-indigo-400">৳{formatNumber(result.calculatedRate.toFixed(4))}</td>
-                     </tr>
-                     <tr>
-                        <td className="py-3 text-slate-500 dark:text-slate-400 font-medium">Fixed Share (Per User)</td>
-                        <td className="py-3 text-right font-bold text-slate-900 dark:text-white">৳{formatNumber(fixedPerUser.toFixed(2))}</td>
-                     </tr>
-                     <tr className="bg-indigo-50/30 dark:bg-indigo-900/10">
-                        <td className="py-4 text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs">Total Bill</td>
-                        <td className="py-4 text-right font-black text-xl text-indigo-900 dark:text-indigo-300">৳{formatNumber(result.totalCollection.toFixed(2))}</td>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                     {result.userCalculations.map((user) => (
+                        <tr key={user.id}>
+                           <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{user.name || 'User'}</td>
+                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono">{formatNumber(user.unitsUsed.toFixed(2))}</td>
+                           <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-white font-mono">৳{formatNumber(Math.round(user.totalPayable))}</td>
+                        </tr>
+                     ))}
+                     <tr className="bg-slate-50/50 dark:bg-slate-800/30">
+                        <td colSpan={2} className="px-4 py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">Total Collection</td>
+                        <td className="px-4 py-4 text-right font-black text-indigo-900 dark:text-indigo-400 text-lg">৳{formatNumber(Math.round(result.totalCollection))}</td>
                      </tr>
                   </tbody>
                </table>
-            </div>
+             </div>
 
-            {/* Individual Split Table */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Individual Split</h3>
-              <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
-                <table className="w-full text-sm text-left border-collapse">
-                    <thead className="bg-slate-50 dark:bg-slate-800/50">
-                       <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          <th className="px-4 py-3">Tenant</th>
-                          <th className="px-4 py-3 text-right">Units</th>
-                          <th className="px-4 py-3 text-right">Payable</th>
-                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                       {result.userCalculations.map((user, idx) => (
-                          <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                             <td className="px-4 py-4 font-bold text-slate-900 dark:text-white">{user.name || `User ${idx + 1}`}</td>
-                             <td className="px-4 py-4 text-right text-slate-600 dark:text-slate-400 font-medium">{formatNumber(user.unitsUsed.toFixed(2))}</td>
-                             <td className="px-4 py-4 text-right font-black text-indigo-900 dark:text-indigo-400 text-base">৳{formatNumber(Math.round(user.totalPayable))}</td>
-                          </tr>
-                       ))}
-                    </tbody>
-                </table>
-              </div>
-            </div>
-
-            <button 
-               onClick={onSaveHistory}
-               className="w-full h-14 bg-indigo-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-xl active:scale-95 transition-all"
-            >
-               <Save className="w-5 h-5" /> Save to History
-            </button>
+             <button 
+                onClick={onSaveHistory}
+                className="w-full h-14 bg-indigo-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-xl active:scale-95 transition-all mt-4"
+             >
+                <Save className="w-5 h-5" /> Save to History
+             </button>
           </div>
         </div>
       )}

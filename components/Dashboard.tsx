@@ -167,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
   const fixedPerUser = meters.length > 0 ? totalSharedFixedCosts / meters.length : 0;
 
   return (
-    <div className="space-y-6 pb-32 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-32 animate-in fade-in duration-500 max-w-2xl mx-auto">
       
       {/* Main Meter Card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
@@ -373,7 +373,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
 
       {/* Bill Results Sections */}
       {showResult && (
-        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20">
+        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20 max-w-md mx-auto">
           <div className="flex items-center justify-between mb-2 no-capture">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Calculation Result</h2>
             <button onClick={() => setShowResult(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
@@ -383,7 +383,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
 
           {/* 1. Summary Section */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Summary</h3>
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{translateMonth(config.month)} Bill</h3>
              
              <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 font-medium">Date</span>

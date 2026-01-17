@@ -1,4 +1,4 @@
-
+// Fixed: Removed malformed duplicate import statement that was causing errors.
 import React, { useRef, useState } from 'react';
 import { BillCalculationResult, BillConfig, MeterReading, TariffConfig } from '../types';
 import { FileText, Printer, Image as ImageIcon, Save, Loader2, X, FileDown } from 'lucide-react';
@@ -144,7 +144,7 @@ const CalculationSummary: React.FC<CalculationSummaryProps> = ({ result, config,
           
           {/* 1. Summary Section */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Summary</h3>
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{translateMonth(config.month)} Bill</h3>
              
              <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 font-medium">Date</span>

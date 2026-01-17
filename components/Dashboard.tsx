@@ -71,36 +71,53 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     const element = resultsRef.current;
     const clone = element.cloneNode(true) as HTMLElement;
     
-    // Force some styles for the capture
+    // Force some styles for the capture to prevent wrapping and ensure centering
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
     container.style.top = '0';
-    container.style.width = '450px'; 
-    container.style.padding = '20px';
+    container.style.width = '520px'; // Increased width to avoid side cropping
+    container.style.padding = '40px 30px'; // Generous padding for a professional look
     container.style.backgroundColor = '#f8fafc'; // light slate bg
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
     
-    // Remove no-print items from clone
+    // Remove no-print/no-capture items from clone
     const noPrintItems = clone.querySelectorAll('.no-capture');
     noPrintItems.forEach(el => el.remove());
     
-    // Ensure text is dark for the image
-    clone.classList.remove('dark');
+    // Ensure text is dark and layout is optimized for capture
+    clone.classList.remove('dark', 'max-w-md', 'mx-auto');
+    clone.style.width = '100%';
+    clone.style.maxWidth = '460px'; // Fix width for consistent capture
+    clone.style.margin = '0';
+    
     const allDark = clone.querySelectorAll('.dark');
     allDark.forEach(el => el.classList.remove('dark'));
+
+    // Prevent unit wrapping in the table specifically for the clone
+    const unitCells = clone.querySelectorAll('td.font-mono');
+    unitCells.forEach(cell => {
+      (cell as HTMLElement).style.whiteSpace = 'nowrap';
+      (cell as HTMLElement).style.paddingLeft = '8px';
+      (cell as HTMLElement).style.paddingRight = '8px';
+    });
     
     container.appendChild(clone);
     document.body.appendChild(container);
 
     // Wait for any layout shifts
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    const canvas = await html2canvas(clone, {
+    const canvas = await html2canvas(container, {
       scale: scale, 
       backgroundColor: '#f8fafc',
       logging: false,
       useCORS: true,
-      width: 450
+      allowTaint: true,
+      width: 520, // Match container width
+      windowWidth: 520
     });
     
     document.body.removeChild(container);
@@ -482,7 +499,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
                      {result.userCalculations.map((user) => (
                         <tr key={user.id}>
                            <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{user.name || 'User'}</td>
-                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono">
+                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
                               ({formatNumber(user.current.toFixed(2))} - {formatNumber(user.previous.toFixed(2))}) = {formatNumber(user.unitsUsed.toFixed(2))}
                            </td>
                            <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-white font-mono">৳{formatNumber(Math.round(user.totalPayable))}</td>

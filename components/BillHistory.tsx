@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { SavedBill } from '../types';
 import { History, Trash2, Calendar, FileText, X, ShieldAlert } from 'lucide-react';
@@ -18,12 +19,12 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
   const swipeTriggeredRef = useRef<boolean>(false);
 
   if (history.length === 0) return (
-    <div className="flex flex-col items-center justify-center p-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 text-center transition-colors duration-200">
-      <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-[2rem] mb-6">
-         <History className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+    <div className="flex flex-col items-center justify-center p-20 bg-indigo-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border border-indigo-100 dark:border-slate-800 text-center transition-colors duration-200">
+      <div className="bg-indigo-900 p-6 rounded-[2rem] mb-6 shadow-xl shadow-indigo-900/20">
+         <History className="w-12 h-12 text-white" />
       </div>
-      <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">{t('bill_history')}</h3>
-      <p className="text-slate-500 dark:text-slate-400 mt-4 font-bold">No records found yet.</p>
+      <h3 className="text-xl font-black text-indigo-900 dark:text-indigo-400 uppercase tracking-widest">No History</h3>
+      <p className="text-slate-500 dark:text-slate-400 mt-4 font-bold">No saved bill records found yet.</p>
     </div>
   );
 
@@ -69,17 +70,9 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
-      <div className="flex items-center gap-4 mb-8">
-          <div className="bg-emerald-600 p-3 rounded-2xl shadow-lg shadow-emerald-500/20">
-              <History className="w-6 h-6 text-white" />
-          </div>
-          <div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5">{t('bill_history')}</h2>
-              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.25em]">{history.length} SAVED RECORDS</div>
-          </div>
-      </div>
-
+    <div className="space-y-4 animate-in fade-in duration-700">
+      {/* Redundant 'Bill History' text removed from here */}
+      
       <div className="space-y-3">
         {history.map((bill) => {
           return (
@@ -92,24 +85,24 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
             >
               <div 
                 onClick={() => onViewReport(bill)}
-                className="glass-card bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border border-white/20 active:scale-[0.98] transition-all duration-300 relative z-10 cursor-pointer hover:border-emerald-500/30"
+                className="glass-card bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-lg border border-indigo-50 dark:border-white/5 active:scale-[0.98] transition-all duration-300 relative z-10 cursor-pointer hover:border-indigo-500/30"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-inner">
-                        <FileText className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-900 flex items-center justify-center border border-indigo-900/10 shadow-lg shadow-indigo-900/10">
+                        <FileText className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h4 className="text-lg font-black text-slate-900 dark:text-white leading-none mb-2">{translateMonth(bill.config.month)}</h4>
                       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        <Calendar className="w-3 h-3" />
+                        <Calendar className="w-3 h-3 text-indigo-500" />
                         {formatDate(bill.config.dateGenerated)}
                       </div>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter leading-none mb-1">
+                    <div className="text-2xl font-black text-indigo-900 dark:text-indigo-400 tracking-tighter leading-none mb-1">
                       ৳{formatNumber(bill.config.totalBillPayable)}
                     </div>
                     <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
@@ -131,7 +124,7 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="glass-card bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-rose-500/20 animate-in slide-in-from-bottom-4 relative overflow-hidden"
+            className="glass-card bg-white dark:bg-slate-900 w-full max-sm:w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-rose-500/20 animate-in slide-in-from-bottom-4 relative overflow-hidden"
           >
             {/* Visual Warning Decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>

@@ -75,13 +75,13 @@ const TrendsDashboard: React.FC<TrendsDashboardProps> = ({ history }) => {
     );
   }
 
-  const colors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#064e3b', '#065f46'];
+  const colors = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#312e81', '#3730a3'];
 
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-4 mb-8">
-            <div className="bg-emerald-600 p-3 rounded-2xl shadow-lg shadow-emerald-500/20">
+            <div className="bg-indigo-900 p-3 rounded-2xl shadow-lg shadow-indigo-500/20">
                 <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -105,13 +105,13 @@ const TrendsDashboard: React.FC<TrendsDashboardProps> = ({ history }) => {
                 <div className="text-3xl font-black text-slate-900 dark:text-white mt-2 font-mono">৳{formatNumber(stats.max)}</div>
             </div>
 
-            <div className="bg-emerald-50 dark:bg-emerald-900/10 p-6 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30">
-                <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+            <div className="bg-indigo-50 dark:bg-indigo-900/10 p-6 rounded-[2rem] border border-indigo-100 dark:border-indigo-900/30">
+                <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5" /> {t('total_paid')}
                 </div>
-                <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 font-mono">৳{formatNumber(stats.total)}</div>
+                <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-2 font-mono">৳{formatNumber(stats.total)}</div>
                 {stats.trend !== 0 && (
-                    <div className={`text-[10px] font-black mt-1 flex items-center gap-1 uppercase tracking-widest ${stats.trend > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                    <div className={`text-[10px] font-black mt-1 flex items-center gap-1 uppercase tracking-widest ${stats.trend > 0 ? 'text-rose-500' : 'text-indigo-500'}`}>
                         {stats.trend > 0 ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                         {formatNumber(Math.abs(stats.trend).toFixed(1))}% {stats.trend > 0 ? t('insight_increase') : t('insight_decrease')}
                     </div>
@@ -136,9 +136,9 @@ const TrendsDashboard: React.FC<TrendsDashboardProps> = ({ history }) => {
                             color: isDark ? '#f8fafc' : '#1e293b',
                             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                         }}
-                        itemStyle={{ color: isDark ? '#10b981' : '#059669', fontWeight: 900 }}
+                        itemStyle={{ color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 900 }}
                         />
-                        <Line type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 3, stroke: isDark ? '#0f172a' : '#fff' }} activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="amount" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: isDark ? '#0f172a' : '#fff' }} activeDot={{ r: 8 }} />
                     </LineChart>
                     </ResponsiveContainer>
                 </div>

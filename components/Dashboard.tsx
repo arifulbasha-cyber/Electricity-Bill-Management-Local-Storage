@@ -2,7 +2,8 @@
 import React, { useState, useRef } from 'react';
 import { BillCalculationResult, BillConfig, MeterReading, Tenant, TariffConfig, Slab } from '../types';
 import { useLanguage } from '../i18n';
-import { CreditCard, Clock, Calculator, Plus, Trash2, ChevronUp, Save, Zap, ShieldAlert, X } from 'lucide-react';
+import { CreditCard, Clock, Calculator, Plus, Trash2, ChevronUp, Save, Zap, ShieldAlert, X, Image as ImageIcon, Share2, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface DashboardProps {
   config: BillConfig;
@@ -18,11 +19,14 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters, onUpdateMeters, onMainMeterUpdate, onConfigUpdate, tenants, tariffConfig, onSaveHistory }) => {
-  const { t, formatNumber, formatDateLocalized } = useLanguage();
+  const { t, formatNumber, formatDateLocalized, translateMonth } = useLanguage();
   const [showResult, setShowResult] = useState(false);
   const [meterToDelete, setMeterToDelete] = useState<MeterReading | null>(null);
   const [confirmText, setConfirmText] = useState('');
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   
+  const resultsRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<number | null>(null);
 
   const handleMainMeterChange = (key: keyof MeterReading, value: any) => {
@@ -57,6 +61,102 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
       onUpdateMeters(meters.filter(m => m.id !== meterToDelete.id));
       setMeterToDelete(null);
       setShowResult(false);
+    }
+  };
+
+  const captureCanvas = async (scale = 3) => {
+    if (!resultsRef.current) return null;
+    
+    // Create a temporary container to render the light-mode version for the image
+    const element = resultsRef.current;
+    const clone = element.cloneNode(true) as HTMLElement;
+    
+    // Force some styles for the capture
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '450px'; 
+    container.style.padding = '20px';
+    container.style.backgroundColor = '#f8fafc'; // light slate bg
+    
+    // Remove no-print items from clone
+    const noPrintItems = clone.querySelectorAll('.no-capture');
+    noPrintItems.forEach(el => el.remove());
+    
+    // Ensure text is dark for the image
+    clone.classList.remove('dark');
+    const allDark = clone.querySelectorAll('.dark');
+    allDark.forEach(el => el.classList.remove('dark'));
+    
+    container.appendChild(clone);
+    document.body.appendChild(container);
+
+    // Wait for any layout shifts
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    const canvas = await html2canvas(clone, {
+      scale: scale, 
+      backgroundColor: '#f8fafc',
+      logging: false,
+      useCORS: true,
+      width: 450
+    });
+    
+    document.body.removeChild(container);
+    return canvas;
+  };
+
+  const handleSaveImage = async () => {
+    try {
+      setIsGeneratingImage(true);
+      const canvas = await captureCanvas();
+      if (!canvas) return;
+      
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `Bill-Split-${config.month}-${new Date().getTime()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to generate image", error);
+      alert("Failed to save image. Please try again.");
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleShareImage = async () => {
+    try {
+      setIsSharing(true);
+      const canvas = await captureCanvas();
+      if (!canvas) return;
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `Bill-${config.month}.png`, { type: 'image/png' });
+        
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: `Electricity Bill Split - ${config.month}`,
+              text: `Detailed split for ${translateMonth(config.month)} Bill.`
+            });
+          } catch (err) {
+            console.log("Sharing cancelled or failed", err);
+          }
+        } else {
+          // Fallback to download if sharing is not supported
+          handleSaveImage();
+        }
+      });
+    } catch (error) {
+      console.error("Failed to share", error);
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -158,7 +258,6 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Sub-meter {index + 1}</h3>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-30">Hold to Remove</span>
             </div>
 
             <div className="space-y-4">
@@ -274,8 +373,8 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
 
       {/* Bill Results Sections */}
       {showResult && (
-        <div className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20">
-          <div className="flex items-center justify-between mb-2">
+        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20">
+          <div className="flex items-center justify-between mb-2 no-capture">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Calculation Result</h2>
             <button onClick={() => setShowResult(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
               <ChevronUp className="w-5 h-5 text-slate-500" />
@@ -363,8 +462,8 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
              <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600 dark:text-slate-400 font-bold">Fixed Cost Per User</span>
                 <span className="text-slate-900 dark:text-white font-black">৳{formatNumber(fixedPerUser.toFixed(2))}</span>
-             </div>
           </div>
+        </div>
 
           {/* 3. Individual Bills Section */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
@@ -397,9 +496,28 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
                </table>
              </div>
 
+             <div className="grid grid-cols-2 gap-3 no-capture">
+                <button 
+                   onClick={handleSaveImage}
+                   disabled={isGeneratingImage}
+                   className="w-full h-14 bg-emerald-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-lg active:scale-95 transition-all"
+                >
+                   {isGeneratingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                   Save PNG
+                </button>
+                <button 
+                   onClick={handleShareImage}
+                   disabled={isSharing}
+                   className="w-full h-14 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-lg active:scale-95 transition-all"
+                >
+                   {isSharing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
+                   Share Bill
+                </button>
+             </div>
+
              <button 
                 onClick={onSaveHistory}
-                className="w-full h-14 bg-indigo-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-xl active:scale-95 transition-all mt-4"
+                className="w-full h-14 bg-slate-900 dark:bg-indigo-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-xl active:scale-95 transition-all mt-2 no-capture"
              >
                 <Save className="w-5 h-5" /> Save to History
              </button>

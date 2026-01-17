@@ -18,8 +18,8 @@ const MobileNav: React.FC<MobileNavProps> = ({ currentView, onChangeView }) => {
   ] as const;
 
   return (
-    <div className="fixed bottom-6 left-6 right-6 z-50 no-print">
-      <div className="max-w-md mx-auto h-20 bg-white/90 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-2xl shadow-black/10 px-4 flex items-center justify-around">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 no-print pb-safe bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="max-w-3xl mx-auto h-16 flex items-center justify-around px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -27,30 +27,28 @@ const MobileNav: React.FC<MobileNavProps> = ({ currentView, onChangeView }) => {
             <button 
               key={item.id}
               onClick={() => onChangeView(item.id)}
-              className={`flex flex-col items-center justify-center transition-all duration-300 relative py-2 px-3 flex-1 ${
-                isActive ? 'scale-110' : 'opacity-40 grayscale-[0.5] hover:opacity-100'
-              }`}
+              className="flex flex-col items-center justify-center flex-1 h-full relative transition-all active:scale-90"
             >
-              <div className={`transition-all duration-300 ${
-                isActive ? 'text-indigo-900 dark:text-indigo-400' : 'text-slate-600 dark:text-white'
+              <div className={`transition-colors duration-200 ${
+                isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
               }`}>
                 <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
               </div>
               
-              <span className={`text-[10px] font-black uppercase tracking-[0.05em] mt-1 ${
-                isActive ? 'text-indigo-900 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-300'
+              <span className={`text-[10px] font-bold mt-1 transition-colors duration-200 ${
+                isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
               }`}>
                 {item.label}
               </span>
 
               {isActive && (
-                <div className="absolute -bottom-1 w-1.5 h-1.5 bg-indigo-500 rounded-full animate-in zoom-in duration-300"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
               )}
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };
 

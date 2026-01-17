@@ -76,9 +76,9 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     container.style.position = 'absolute';
     container.style.left = '-9999px';
     container.style.top = '0';
-    container.style.width = '520px'; // Increased width to avoid side cropping
-    container.style.padding = '40px 30px'; // Generous padding for a professional look
-    container.style.backgroundColor = '#f8fafc'; // light slate bg
+    container.style.width = '520px'; 
+    container.style.padding = '40px 30px'; 
+    container.style.backgroundColor = '#f8fafc'; 
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
@@ -88,9 +88,9 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     noPrintItems.forEach(el => el.remove());
     
     // Ensure text is dark and layout is optimized for capture
-    clone.classList.remove('dark', 'max-w-md', 'mx-auto');
+    clone.classList.remove('dark', 'max-w-2xl', 'mx-auto');
     clone.style.width = '100%';
-    clone.style.maxWidth = '460px'; // Fix width for consistent capture
+    clone.style.maxWidth = '460px'; 
     clone.style.margin = '0';
     
     const allDark = clone.querySelectorAll('.dark');
@@ -107,7 +107,6 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     container.appendChild(clone);
     document.body.appendChild(container);
 
-    // Wait for any layout shifts
     await new Promise(resolve => setTimeout(resolve, 200));
     
     const canvas = await html2canvas(container, {
@@ -116,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
       logging: false,
       useCORS: true,
       allowTaint: true,
-      width: 520, // Match container width
+      width: 520,
       windowWidth: 520
     });
     
@@ -166,7 +165,6 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
             console.log("Sharing cancelled or failed", err);
           }
         } else {
-          // Fallback to download if sharing is not supported
           handleSaveImage();
         }
       });
@@ -182,6 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
   const baseBill = result.totalCollection - result.lateFee - bkash;
   const totalSharedFixedCosts = tariffConfig.demandCharge + tariffConfig.meterRent + result.vatFixed + result.lateFee + bkash;
   const fixedPerUser = meters.length > 0 ? totalSharedFixedCosts / meters.length : 0;
+  const billYear = config.dateGenerated.split('-')[0].slice(-2);
 
   return (
     <div className="space-y-6 pb-32 animate-in fade-in duration-500 max-w-2xl mx-auto">
@@ -390,7 +389,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
 
       {/* Bill Results Sections */}
       {showResult && (
-        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20 max-w-md mx-auto">
+        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20 max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-2 no-capture">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Calculation Result</h2>
             <button onClick={() => setShowResult(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
@@ -400,7 +399,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
 
           {/* 1. Summary Section */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{translateMonth(config.month)} Bill</h3>
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Electricity Bill {translateMonth(config.month)} {billYear}</h3>
              
              <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 font-medium">Date</span>

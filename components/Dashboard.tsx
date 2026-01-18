@@ -2,7 +2,6 @@
 import React, { useState, useRef } from 'react';
 import { BillCalculationResult, BillConfig, MeterReading, Tenant, TariffConfig } from '../types';
 import { useLanguage } from '../i18n';
-// Added Trash2 to the imports from lucide-react
 import { CreditCard, Clock, Calculator, ChevronUp, Save, Zap, ShieldAlert, X, Image as ImageIcon, Share2, Loader2, Download, Smartphone, Trash2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
@@ -69,12 +68,11 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
   const captureCanvas = async (scale = 2) => {
     if (!resultsRef.current) return null;
     
-    // Create a temporary container to render the light-mode version for the image
     const element = resultsRef.current;
     const clone = element.cloneNode(true) as HTMLElement;
     
     const container = document.createElement('div');
-    container.style.position = 'fixed'; // Using fixed instead of absolute for better mobile layout stability
+    container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '480px'; 
@@ -103,7 +101,6 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
     container.appendChild(clone);
     document.body.appendChild(container);
 
-    // Short delay for mobile layout engine
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const canvas = await html2canvas(container, {
@@ -122,7 +119,7 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
   const handleSaveImage = async () => {
     try {
       setIsGeneratingImage(true);
-      const canvas = await captureCanvas(2); // Reduced scale for APK performance
+      const canvas = await captureCanvas(2);
       if (!canvas) return;
       
       const image = canvas.toDataURL("image/png");
@@ -156,7 +153,6 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
             console.log("Sharing failed", err);
           }
         } else {
-          // If native share fails, fallback to preview so they can manual save
           setPreviewImage(canvas.toDataURL("image/png"));
         }
       });
@@ -175,47 +171,50 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
   const billYear = config.dateGenerated.split('-')[0].slice(-2);
 
   return (
-    <div className="space-y-6 pb-32 animate-in fade-in duration-500 max-w-2xl mx-auto">
+    <div className="space-y-3 pb-32 animate-in fade-in duration-500 max-w-2xl mx-auto">
       
-      {/* Main Meter Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">Main Meter</h3>
+      {/* Main Meter Card - Reduced Padding/Spacing */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-3 shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Main Meter</h3>
+          <span className="text-[10px] font-bold text-emerald-500 uppercase">{mainUnits} Units used</span>
+        </div>
         
-        <div className="space-y-4">
-          <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3 cursor-pointer">
-            <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bill Date</label>
-            <div className="flex justify-between items-center h-10">
-              <span className="text-slate-700 dark:text-slate-200">{formatDateLocalized(config.dateGenerated)}</span>
+        <div className="space-y-3">
+          <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer h-10 flex items-center">
+            <label className="absolute -top-2 left-2 bg-white dark:bg-slate-900 px-1 text-[8px] font-black text-slate-400 uppercase tracking-widest">Bill Date</label>
+            <div className="flex justify-between items-center w-full">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{formatDateLocalized(config.dateGenerated)}</span>
               <input 
                 type="date" 
                 value={config.dateGenerated}
                 onChange={(e) => { handleConfigChange('dateGenerated', e.target.value); setShowResult(false); }}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" 
               />
-              <Clock className="w-5 h-5 text-slate-400" />
+              <Clock className="w-4 h-4 text-slate-400" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-              <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Previous Reading</label>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-2 h-10 flex items-center">
+              <label className="absolute -top-2 left-2 bg-white dark:bg-slate-900 px-1 text-[8px] font-black text-slate-400 uppercase tracking-widest">Previous</label>
               <input 
                 type="number"
                 value={mainMeter.previous || ''}
                 onChange={(e) => { handleMainMeterChange('previous', parseFloat(e.target.value) || 0); setShowResult(false); }}
                 onFocus={(e) => e.target.select()}
-                className="w-full h-10 bg-transparent text-slate-900 dark:text-white outline-none font-medium"
+                className="w-full bg-transparent text-sm font-bold text-slate-900 dark:text-white outline-none"
                 placeholder=""
               />
             </div>
-            <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-              <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Reading</label>
+            <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-2 h-10 flex items-center">
+              <label className="absolute -top-2 left-2 bg-white dark:bg-slate-900 px-1 text-[8px] font-black text-slate-400 uppercase tracking-widest">Current</label>
               <input 
                 type="number"
                 value={mainMeter.current || ''}
                 onChange={(e) => { handleMainMeterChange('current', parseFloat(e.target.value) || 0); setShowResult(false); }}
                 onFocus={(e) => e.target.select()}
-                className="w-full h-10 bg-transparent text-slate-900 dark:text-white outline-none font-medium"
+                className="w-full bg-transparent text-sm font-bold text-slate-900 dark:text-white outline-none"
                 placeholder=""
               />
             </div>
@@ -223,94 +222,95 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
         </div>
       </div>
 
-      {/* Bill Options Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CreditCard className="w-6 h-6 text-slate-700 dark:text-slate-400" />
-            <span className="text-base font-semibold text-slate-700 dark:text-slate-200">Include bKash Fee</span>
-          </div>
+      {/* Bill Options Card - More Compact */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-3 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+        <div className="flex-1 flex items-center justify-between border-r border-slate-100 dark:border-slate-800 pr-4">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">bKash Fee</span>
           <button 
             onClick={() => { handleConfigChange('includeBkashFee', !config.includeBkashFee); setShowResult(false); }}
-            className={`w-12 h-6 rounded-full transition-colors relative ${config.includeBkashFee ? 'bg-indigo-900' : 'bg-slate-300'}`}
+            className={`w-10 h-5 rounded-full transition-colors relative ${config.includeBkashFee ? 'bg-indigo-600' : 'bg-slate-200'}`}
           >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.includeBkashFee ? 'left-7' : 'left-1'}`}></div>
+            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${config.includeBkashFee ? 'left-5.5' : 'left-0.5'}`}></div>
           </button>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Clock className="w-6 h-6 text-slate-700 dark:text-slate-400" />
-            <span className="text-base font-semibold text-slate-700 dark:text-slate-200">Include Late Fee</span>
-          </div>
+        <div className="flex-1 flex items-center justify-between">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Late Fee</span>
           <button 
             onClick={() => { handleConfigChange('includeLateFee', !config.includeLateFee); setShowResult(false); }}
-            className={`w-12 h-6 rounded-full transition-colors relative ${config.includeLateFee ? 'bg-indigo-900' : 'bg-slate-300'}`}
+            className={`w-10 h-5 rounded-full transition-colors relative ${config.includeLateFee ? 'bg-indigo-600' : 'bg-slate-200'}`}
           >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.includeLateFee ? 'left-7' : 'left-1'}`}></div>
+            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${config.includeLateFee ? 'left-5.5' : 'left-0.5'}`}></div>
           </button>
         </div>
       </div>
 
-      {/* Sub-meters List */}
-      <div className="space-y-6">
-        {meters.map((meter, index) => (
-          <div 
-            key={meter.id} 
-            onMouseDown={() => startLongPress(meter)}
-            onMouseUp={endLongPress}
-            onMouseLeave={endLongPress}
-            onTouchStart={() => startLongPress(meter)}
-            onTouchEnd={endLongPress}
-            className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 relative transition-transform active:scale-[0.98] select-none"
-          >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Sub-meter {index + 1}</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-                <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Name</label>
-                <input 
-                  type="text"
-                  value={meter.name}
-                  onChange={(e) => { handleMeterChange(meter.id, 'name', e.target.value); setShowResult(false); }}
-                  onFocus={(e) => e.target.select()}
-                  className="w-full h-10 bg-transparent text-slate-900 dark:text-white outline-none font-medium"
-                  placeholder=""
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-                  <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Previous Reading</label>
-                  <input 
-                    type="number"
-                    value={meter.previous || ''}
-                    onChange={(e) => { handleMeterChange(meter.id, 'previous', parseFloat(e.target.value) || 0); setShowResult(false); }}
-                    onFocus={(e) => e.target.select()}
-                    className="w-full h-10 bg-transparent text-slate-900 dark:text-white outline-none font-medium"
-                    placeholder=""
-                  />
+      {/* Sub-meters List - Compact Table-like Rows */}
+      <div className="space-y-2">
+        {meters.map((meter, index) => {
+          const units = Math.max(0, meter.current - meter.previous);
+          return (
+            <div 
+              key={meter.id} 
+              onMouseDown={() => startLongPress(meter)}
+              onMouseUp={endLongPress}
+              onMouseLeave={endLongPress}
+              onTouchStart={() => startLongPress(meter)}
+              onTouchEnd={endLongPress}
+              className="bg-white dark:bg-slate-900 rounded-xl p-2.5 shadow-sm border border-slate-100 dark:border-slate-800 relative transition-transform active:scale-[0.99] select-none"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-none w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                  <span className="text-xs font-black text-indigo-600">{index + 1}</span>
                 </div>
-                <div className="relative border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-                  <label className="absolute -top-2.5 left-3 bg-white dark:bg-slate-900 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Reading</label>
-                  <input 
-                    type="number"
-                    value={meter.current || ''}
-                    onChange={(e) => { handleMeterChange(meter.id, 'current', parseFloat(e.target.value) || 0); setShowResult(false); }}
-                    onFocus={(e) => e.target.select()}
-                    className="w-full h-10 bg-transparent text-slate-900 dark:text-white outline-none font-medium"
-                    placeholder=""
-                  />
+                
+                <div className="flex-1 grid grid-cols-12 gap-2 items-center">
+                  <div className="col-span-5 relative">
+                    <label className="absolute -top-2 left-1 px-1 bg-white dark:bg-slate-900 text-[7px] font-black text-slate-400 uppercase">User Name</label>
+                    <input 
+                      type="text"
+                      value={meter.name}
+                      onChange={(e) => { handleMeterChange(meter.id, 'name', e.target.value); setShowResult(false); }}
+                      onFocus={(e) => e.target.select()}
+                      className="w-full h-8 bg-transparent text-xs font-bold text-slate-900 dark:text-white outline-none border-b border-slate-100 dark:border-slate-800 focus:border-indigo-500"
+                      placeholder="Name"
+                    />
+                  </div>
+                  
+                  <div className="col-span-3 relative">
+                    <label className="absolute -top-2 left-1 px-1 bg-white dark:bg-slate-900 text-[7px] font-black text-slate-400 uppercase tracking-tighter">Prev</label>
+                    <input 
+                      type="number"
+                      value={meter.previous || ''}
+                      onChange={(e) => { handleMeterChange(meter.id, 'previous', parseFloat(e.target.value) || 0); setShowResult(false); }}
+                      onFocus={(e) => e.target.select()}
+                      className="w-full h-8 bg-transparent text-xs font-bold text-slate-900 dark:text-white outline-none border-b border-slate-100 dark:border-slate-800 focus:border-indigo-500 text-center"
+                    />
+                  </div>
+
+                  <div className="col-span-3 relative">
+                    <label className="absolute -top-2 left-1 px-1 bg-white dark:bg-slate-900 text-[7px] font-black text-emerald-500 uppercase tracking-tighter">Curr</label>
+                    <input 
+                      type="number"
+                      value={meter.current || ''}
+                      onChange={(e) => { handleMeterChange(meter.id, 'current', parseFloat(e.target.value) || 0); setShowResult(false); }}
+                      onFocus={(e) => e.target.select()}
+                      className="w-full h-8 bg-transparent text-xs font-bold text-slate-900 dark:text-white outline-none border-b border-slate-100 dark:border-slate-800 focus:border-indigo-500 text-center"
+                    />
+                  </div>
+
+                  <div className="col-span-1 text-right flex flex-col justify-center">
+                    <span className="text-[8px] font-black text-slate-400 uppercase block">Units</span>
+                    <span className="text-[10px] font-black text-indigo-600">{units}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Modals and Results remain but results UI is also compacted */}
       {meterToDelete && (
         <div 
           onClick={() => setMeterToDelete(null)}
@@ -318,88 +318,61 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-rose-500/20 animate-in slide-in-from-bottom-4 relative overflow-hidden"
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-rose-500/20"
           >
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shadow-inner">
-                     <ShieldAlert className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Security Check</h3>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+                   <ShieldAlert className="w-5 h-5" />
                 </div>
-                <button onClick={() => setMeterToDelete(null)} className="p-3 bg-black/5 dark:bg-white/5 rounded-2xl active:scale-90 transition-all">
-                    <X className="w-5 h-5 text-slate-500" />
-                </button>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase">Security Check</h3>
               </div>
-
-              <div className="space-y-6">
-                <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-center">
-                  <p className="text-xs font-bold text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                    Type <span className="text-rose-500 font-black">DELETE</span> to confirm removal of <span className="font-black underline">{meterToDelete.name || 'this sub-meter'}</span>.
-                  </p>
-                  
-                  <div className="relative">
-                    <input 
-                      type="text"
-                      autoFocus
-                      placeholder="DELETE"
-                      value={confirmText}
-                      onChange={(e) => setConfirmText(e.target.value)}
-                      className="w-full h-16 rounded-xl bg-white dark:bg-slate-950 border border-rose-500/20 px-4 text-center text-lg font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <button 
-                    disabled={confirmText.toUpperCase() !== 'DELETE'}
-                    onClick={handleConfirmDelete}
-                    className={`w-full h-14 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
-                      confirmText.toUpperCase() === 'DELETE'
-                        ? 'bg-rose-600 text-white shadow-xl shadow-rose-500/30 active:scale-95'
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-50'
-                    }`}
-                  >
-                    <Trash2 className="w-5 h-5" /> Confirm Removal
-                  </button>
-                </div>
-              </div>
+              <button onClick={() => setMeterToDelete(null)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-[10px] font-bold text-slate-600 dark:text-slate-300 text-center">
+                Type <span className="text-rose-500 font-black">DELETE</span> to confirm removal.
+              </p>
+              <input 
+                type="text"
+                autoFocus
+                placeholder="DELETE"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                className="w-full h-12 rounded-xl bg-slate-50 dark:bg-slate-950 border border-rose-500/10 text-center text-sm font-black outline-none"
+              />
+              <button 
+                disabled={confirmText.toUpperCase() !== 'DELETE'}
+                onClick={handleConfirmDelete}
+                className="w-full h-12 rounded-xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest disabled:opacity-50"
+              >
+                Confirm Removal
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Image Preview Modal (For APK Save Fallback) */}
       {previewImage && (
         <div 
           onClick={() => setPreviewImage(null)}
           className="fixed inset-0 z-[110] flex flex-col items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-300"
         >
-          <div className="w-full max-w-md flex flex-col gap-4">
+          <div className="w-full max-w-md flex flex-col gap-3">
              <div className="flex justify-between items-center text-white">
-                <div className="flex items-center gap-2">
-                   <Smartphone className="w-5 h-5 text-indigo-400" />
-                   <span className="text-sm font-bold">Preview Bill Image</span>
-                </div>
-                <button onClick={() => setPreviewImage(null)} className="p-2 bg-white/10 rounded-full">
-                   <X className="w-6 h-6" />
+                <span className="text-xs font-bold">Preview Bill Image</span>
+                <button onClick={() => setPreviewImage(null)} className="p-1.5 bg-white/10 rounded-full">
+                   <X className="w-5 h-5" />
                 </button>
              </div>
-             
-             <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-white/20 touch-auto">
-                <img 
-                  src={previewImage} 
-                  alt="Bill Preview" 
-                  className="w-full h-auto select-none pointer-events-auto"
-                  onContextMenu={(e) => e.preventDefault()} // Standard mobile behavior
-                />
+             <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                <img src={previewImage} alt="Bill Preview" className="w-full h-auto" />
              </div>
-
-             <div className="bg-indigo-500/20 border border-indigo-500/30 p-4 rounded-2xl text-center">
-                <p className="text-white text-xs font-bold leading-relaxed">
-                   <Download className="w-4 h-4 inline mr-1 mb-1 text-indigo-400" />
-                   Long press on the image above and select <span className="text-indigo-400 underline">"Download Image"</span> to save to your gallery.
+             <div className="bg-indigo-500/20 p-3 rounded-xl text-center">
+                <p className="text-white text-[10px] font-bold">
+                   <Download className="w-3 h-3 inline mr-1" /> Long press image to save.
                 </p>
              </div>
           </div>
@@ -409,161 +382,73 @@ const Dashboard: React.FC<DashboardProps> = ({ config, result, mainMeter, meters
       {!showResult && (
         <button 
           onClick={() => setShowResult(true)}
-          className="w-full h-16 bg-indigo-900 text-white rounded-2xl font-bold text-base shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+          className="w-full h-14 bg-indigo-900 text-white rounded-xl font-bold text-sm shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          <Calculator className="w-5 h-5" /> Calculate Split Bill
+          <Calculator className="w-4 h-4" /> Calculate Split Bill
         </button>
       )}
 
-      {/* Bill Results Sections */}
       {showResult && (
-        <div ref={resultsRef} className="space-y-4 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20 max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-2 no-capture">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Calculation Result</h2>
-            <button onClick={() => setShowResult(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
-              <ChevronUp className="w-5 h-5 text-slate-500" />
+        <div ref={resultsRef} className="space-y-3 animate-in slide-in-from-bottom-6 duration-500 no-print pb-20 max-w-2xl mx-auto">
+          <div className="flex items-center justify-between no-capture">
+            <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Calculation Result</h2>
+            <button onClick={() => setShowResult(false)} className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <ChevronUp className="w-4 h-4 text-slate-500" />
             </button>
           </div>
 
-          {/* 1. Summary Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Electricity Bill {translateMonth(config.month)} {billYear}</h3>
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 space-y-3">
+             <h3 className="text-sm font-black text-slate-800 dark:text-white border-b border-slate-50 pb-2">{translateMonth(config.month)} {billYear}</h3>
              
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Date</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">{formatDateLocalized(config.dateGenerated)}</span>
-             </div>
-
-             <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                   <span className="text-sm text-slate-500 font-medium">Total Bill Payable</span>
-                   <span className="text-base font-black text-slate-900 dark:text-white">৳{formatNumber(result.totalCollection.toFixed(2))}</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-bold text-center italic bg-slate-50 dark:bg-slate-800/50 py-2 rounded-xl">
-                   (Base Bill: ৳{formatNumber(baseBill.toFixed(2))} + Late Fee: ৳{formatNumber(result.lateFee.toFixed(2))} + bKash Fee: ৳{formatNumber(bkash.toFixed(2))})
-                </div>
-             </div>
-
-             <div className="flex justify-between items-center text-sm pt-2">
-                <span className="text-slate-500 font-medium">Total Units (Main)</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">
-                   ({formatNumber(mainMeter.current.toFixed(2))} - {formatNumber(mainMeter.previous.toFixed(2))}) = {formatNumber(mainUnits.toFixed(2))} kWh
-                </span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Total User Units</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">{formatNumber(result.totalUnits.toFixed(2))} kWh</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Calculated Rate/Unit (Energy)</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.calculatedRate.toFixed(2))}</span>
+             <div className="grid grid-cols-2 gap-y-2 text-[11px]">
+                <span className="text-slate-500 font-bold">Total Bill Payable</span>
+                <span className="text-right text-slate-900 dark:text-white font-black">৳{formatNumber(result.totalCollection.toFixed(2))}</span>
+                
+                <span className="text-slate-500 font-bold">Total Units (Main)</span>
+                <span className="text-right text-slate-800 dark:text-slate-200 font-bold">{formatNumber(mainUnits.toFixed(2))} kWh</span>
+                
+                <span className="text-slate-500 font-bold">Calculated Rate/Unit</span>
+                <span className="text-right text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.calculatedRate.toFixed(3))}</span>
              </div>
           </div>
 
-          {/* 2. Cost Configuration Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Cost Configuration</h3>
-             
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Demand Charge</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(tariffConfig.demandCharge.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Meter Rent</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(tariffConfig.meterRent.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">VAT (Fixed - 5.0% on DC+Rent)</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.vatFixed.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Total VAT</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.vatTotal.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Late Fee</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(result.lateFee.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">bKash Fee</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">৳{formatNumber(bkash.toFixed(2))}</span>
-             </div>
-
-             <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-600 dark:text-slate-400 font-bold">Total Shared Fixed Costs</span>
-                <span className="text-slate-900 dark:text-white font-black">৳{formatNumber(totalSharedFixedCosts.toFixed(2))}</span>
-             </div>
-
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-600 dark:text-slate-400 font-bold">Fixed Cost Per User</span>
-                <span className="text-slate-900 dark:text-white font-black">৳{formatNumber(fixedPerUser.toFixed(2))}</span>
-          </div>
-        </div>
-
-          {/* 3. Individual Bills Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Individual Bills</h3>
-             
-             <div className="overflow-hidden border border-slate-100 dark:border-slate-800 rounded-xl">
-               <table className="w-full text-left border-collapse text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800/50">
-                     <tr className="text-slate-500 font-bold text-xs uppercase">
-                        <th className="px-4 py-3">User</th>
-                        <th className="px-4 py-3 text-right">Units</th>
-                        <th className="px-4 py-3 text-right">Bill</th>
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+             <h3 className="text-xs font-black text-slate-800 dark:text-white mb-3 uppercase">Individual Split</h3>
+             <div className="overflow-hidden border border-slate-50 dark:border-slate-800 rounded-lg">
+               <table className="w-full text-left text-[10px]">
+                  <thead className="bg-slate-50 dark:bg-slate-800">
+                     <tr className="text-slate-500 font-black uppercase">
+                        <th className="px-3 py-2">User</th>
+                        <th className="px-3 py-2 text-right">Units</th>
+                        <th className="px-3 py-2 text-right">Bill</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                      {result.userCalculations.map((user) => (
                         <tr key={user.id}>
-                           <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{user.name || 'User'}</td>
-                           <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
-                              ({formatNumber(user.current.toFixed(2))} - {formatNumber(user.previous.toFixed(2))}) = {formatNumber(user.unitsUsed.toFixed(2))}
-                           </td>
-                           <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-white font-mono">৳{formatNumber(Math.round(user.totalPayable))}</td>
+                           <td className="px-3 py-2 font-bold text-slate-700 dark:text-slate-300">{user.name}</td>
+                           <td className="px-3 py-2 text-right text-slate-600 dark:text-slate-400 font-mono">{formatNumber(user.unitsUsed.toFixed(1))}</td>
+                           <td className="px-3 py-2 text-right font-black text-slate-900 dark:text-white">৳{formatNumber(Math.round(user.totalPayable))}</td>
                         </tr>
                      ))}
-                     <tr className="bg-slate-50/50 dark:bg-slate-800/30">
-                        <td colSpan={2} className="px-4 py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">Total Collection</td>
-                        <td className="px-4 py-4 text-right font-black text-indigo-900 dark:text-indigo-400 text-lg">৳{formatNumber(Math.round(result.totalCollection))}</td>
-                     </tr>
                   </tbody>
                </table>
              </div>
 
-             <div className="grid grid-cols-2 gap-3 no-capture">
-                <button 
-                   onClick={handleSaveImage}
-                   disabled={isGeneratingImage}
-                   className="w-full h-14 bg-emerald-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-lg active:scale-95 transition-all"
-                >
-                   {isGeneratingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
-                   Preview & Save
+             <div className="grid grid-cols-2 gap-2 no-capture mt-4">
+                <button onClick={handleSaveImage} className="w-full h-10 bg-emerald-600 text-white rounded-lg font-bold flex items-center justify-center gap-1 text-[10px] uppercase shadow-md">
+                   {isGeneratingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />} Preview
                 </button>
-                <button 
-                   onClick={handleShareImage}
-                   disabled={isSharing}
-                   className="w-full h-14 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-lg active:scale-95 transition-all"
-                >
-                   {isSharing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
-                   Share Bill
+                <button onClick={handleShareImage} className="w-full h-10 bg-indigo-600 text-white rounded-lg font-bold flex items-center justify-center gap-1 text-[10px] uppercase shadow-md">
+                   {isSharing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Share2 className="w-3 h-3" />} Share
                 </button>
              </div>
 
              <button 
                 onClick={onSaveHistory}
-                className="w-full h-14 bg-slate-900 dark:bg-indigo-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-sm shadow-xl active:scale-95 transition-all mt-2 no-capture"
+                className="w-full h-10 bg-slate-900 dark:bg-indigo-900 text-white rounded-lg font-bold flex items-center justify-center gap-1 text-[10px] uppercase mt-2 no-capture shadow-md"
              >
-                <Save className="w-5 h-5" /> Save to History
+                <Save className="w-3 h-3" /> Save to History
              </button>
           </div>
         </div>

@@ -116,7 +116,7 @@ const AppContent: React.FC = () => {
   const { t, translateMonth } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   type AppView = 'home' | 'estimator' | 'history' | 'stats' | 'trends' | 'tariff';
-  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [currentView, setCurrentView] = useState<AppView>('estimator');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'none' | 'cloud'>('none');
   const [config, setConfig] = useState<BillConfig>(INITIAL_CONFIG);

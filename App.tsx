@@ -297,7 +297,7 @@ const AppContent: React.FC = () => {
       case 'estimator': return <BillEstimator tariffConfig={tariffConfig} />;
       case 'history': return <BillHistory history={history} onLoad={loadFromHistory} onDelete={(id) => { const h = history.filter(h => h.id !== id); setHistory(h); localStorage.setItem('tmss_bill_history', JSON.stringify(h)); }} onViewReport={loadFromHistory} />;
       case 'stats': return <ConsumptionStats calculations={calculationResult.userCalculations} totalUnits={calculationResult.totalUnits} />;
-      case 'trends': return <TrendsDashboard history={history} />;
+      case 'trends': return <TrendsDashboard history={history} tariffConfig={tariffConfig} />;
       case 'tariff': return <TariffSettings config={tariffConfig} onSave={handleTariffSave} />;
       default: return null;
     }

@@ -59,13 +59,13 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700 max-w-2xl mx-auto">
+    <div className="space-y-4 animate-in fade-in duration-700 max-w-2xl mx-auto pb-20">
       <div className="space-y-3">
         {history.map((bill) => {
           return (
             <div 
               key={bill.id} 
-              className="relative overflow-hidden rounded-[2.5rem] select-none touch-none"
+              className="relative overflow-hidden rounded-[2.5rem] select-none"
               onMouseDown={() => startLongPress(bill)}
               onMouseUp={cancelLongPress}
               onMouseLeave={cancelLongPress}
@@ -140,7 +140,7 @@ const BillHistory: React.FC<BillHistoryProps> = ({ history, onLoad, onDelete, on
                       placeholder="DELETE"
                       value={confirmText}
                       onChange={(e) => setConfirmText(e.target.value)}
-                      className="w-full h-16 rounded-xl bg-white dark:bg-slate-950 border border-rose-500/20 px-4 text-center text-lg font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800 uppercase"
+                      className="w-full h-16 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/20 px-4 text-center text-lg font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800 uppercase"
                     />
                   </div>
                 </div>
